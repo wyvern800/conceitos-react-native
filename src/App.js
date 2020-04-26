@@ -22,23 +22,16 @@ export default function App() {
   }, []);
 
   async function handleLikeRepository(id) {
-    api.post("repositories/" + id + "/like").then(
-      (response) => {
-        console.log("like dado ao repo " + id);
-
-        /*repositories.reduce((repositoriesOld, newRepositories) => [
-          repositories[id],
-          response.data,
-        ]);*/
-
-        api.get("repositories").then((response) => {
-          console.log(response.data);
-          setRepositories(response.data);
-        });
+    const { data: sendLike } = await api.post(`repositories/${id}/like`);
+    const updateRepositories = repositories.map((repository) => {
+      if (repository.id === id) {
+        return sendLike;
+      } else {
+        return repository;
       }
+    });
 
-      // Implement "Like Repository" functionality
-    );
+    setRepositories(updateRepositories);
   }
 
   return (
@@ -55,16 +48,8 @@ export default function App() {
 
                 {/*techs container */}
                 <View style={styles.techsContainer}>
-                  {/*
-                  Tentei usar foreach mas por algum estranho motivo não funcionou :s
-                  repository.techs.forEach((tech, i) => (
-                    <Text style={styles.tech} key={i}>
-                      {tech}
-                    </Text>
-                  ))*/}
-
-                  {repository.techs.map((tech) => (
-                    <Text key={tech.id} style={styles.tech}>
+                  {repository.techs.map((tech, i) => (
+                    <Text key={i} style={styles.tech}>
                       {tech}
                     </Text>
                   ))}
@@ -77,7 +62,8 @@ export default function App() {
                     // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
                     testID={`repository-likes-${repository.id}`}
                   >
-                    {repository.likes} curtida
+                    {repository.likes}
+                    {repository.likes > 1 ? " curtidas" : " curtida"}
                   </Text>
                 </View>
 
@@ -92,45 +78,6 @@ export default function App() {
               </>
             )}
           />
-
-          {/*<Text style={styles.repository}>Repository 1</Text>*/}
-
-          {/*
-          Listar os repositórios da sua API: 
-          Deve ser capaz de criar uma lista de todos os repositórios que estão 
-          cadastrados na sua API com os campos title, techs e número de curtidas seguindo o padrão ${repository.likes} 
-          curtidas, apenas alterando o número para ser dinâmico.
-          */}
-
-          {/*<View style={styles.techsContainer}>
-            <Text style={styles.tech}>ReactJS</Text>
-            <Text style={styles.tech}>Node.js</Text>
-          </View>*/}
-
-          {/* 
-          Curtir um repositório listado da API: 
-          Deve ser capaz de curtir um item na sua API através de um botão com o
-           texto Curtir e deve atualizar o número de likes na listagem no mobile.
-          */}
-
-          {/*<View style={styles.likesContainer}>
-            <Text
-              style={styles.likeText}
-              // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
-              testID={`repository-likes-1`}
-            >
-              3 curtidas
-            </Text>
-          </View>*/}
-
-          {/*<TouchableOpacity
-            style={styles.button}
-            onPress={() => handleLikeRepository(1)}
-            // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
-            testID={`like-button-1`}
-          >
-            <Text style={styles.buttonText}>Curtir</Text>
-          </TouchableOpacity>*/}
         </View>
       </SafeAreaView>
     </>
