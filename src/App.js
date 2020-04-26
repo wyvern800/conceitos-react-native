@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import api from "./services/api";
 
 import {
   SafeAreaView,
@@ -11,8 +12,34 @@ import {
 } from "react-native";
 
 export default function App() {
+  const [repositories, setRepositories] = useState([]);
+
+  useEffect(() => {
+    api.get("repositories").then((response) => {
+      console.log(response.data);
+      setRepositories(response.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    api.get("repositories").then((response) => {
+      console.log(response.data);
+      setRepositories(response.data);
+    });
+  }, [repositories]);
+
   async function handleLikeRepository(id) {
-    // Implement "Like Repository" functionality
+    api.post(`/repositories/${id}/like`).then(
+      (response) => {
+        console.log("like dado ao repo ", id);
+
+        repositories.reduce((repositoriesOld, newRepositories) => [
+          repositories[id],
+          response.data,
+        ]);
+      }
+      // Implement "Like Repository" functionality
+    );
   }
 
   return (
@@ -20,18 +47,72 @@ export default function App() {
       <StatusBar barStyle="light-content" backgroundColor="#7159c1" />
       <SafeAreaView style={styles.container}>
         <View style={styles.repositoryContainer}>
-          <Text style={styles.repository}>Repository 1</Text>
+          <FlatList
+            data={repositories}
+            keyExtractor={(repository) => repository.id}
+            renderItem={({ item: repository }) => (
+              <>
+                <Text style={styles.repository}>{repository.title}</Text>
 
-          <View style={styles.techsContainer}>
-            <Text style={styles.tech}>
-              ReactJS
-            </Text>
-            <Text style={styles.tech}>
-              Node.js
-            </Text>
-          </View>
+                {/*techs container */}
+                <View style={styles.techsContainer}>
+                  {/*
+                  Tentei usar foreach mas por algum estranho motivo não funcionou :s
+                  repository.techs.forEach((tech, i) => (
+                    <Text style={styles.tech} key={i}>
+                      {tech}
+                    </Text>
+                  ))*/}
 
-          <View style={styles.likesContainer}>
+                  {repository.techs.map((tech) => (
+                    <Text style={styles.tech}>{tech}</Text>
+                  ))}
+                </View>
+
+                {/*likes container */}
+                <View style={styles.likesContainer}>
+                  <Text
+                    style={styles.likeText}
+                    // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
+                    testID={`repository-likes-${repository.id}`}
+                  >
+                    {repository.likes} curtida
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => handleLikeRepository(repository.id)}
+                  // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
+                  testID={`like-button-${repository.id}`}
+                >
+                  <Text style={styles.buttonText}>Curtir</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          />
+
+          {/*<Text style={styles.repository}>Repository 1</Text>*/}
+
+          {/*
+          Listar os repositórios da sua API: 
+          Deve ser capaz de criar uma lista de todos os repositórios que estão 
+          cadastrados na sua API com os campos title, techs e número de curtidas seguindo o padrão ${repository.likes} 
+          curtidas, apenas alterando o número para ser dinâmico.
+          */}
+
+          {/*<View style={styles.techsContainer}>
+            <Text style={styles.tech}>ReactJS</Text>
+            <Text style={styles.tech}>Node.js</Text>
+          </View>*/}
+
+          {/* 
+          Curtir um repositório listado da API: 
+          Deve ser capaz de curtir um item na sua API através de um botão com o
+           texto Curtir e deve atualizar o número de likes na listagem no mobile.
+          */}
+
+          {/*<View style={styles.likesContainer}>
             <Text
               style={styles.likeText}
               // Remember to replace "1" below with repository ID: {`repository-likes-${repository.id}`}
@@ -39,16 +120,16 @@ export default function App() {
             >
               3 curtidas
             </Text>
-          </View>
+          </View>*/}
 
-          <TouchableOpacity
+          {/*<TouchableOpacity
             style={styles.button}
             onPress={() => handleLikeRepository(1)}
             // Remember to replace "1" below with repository ID: {`like-button-${repository.id}`}
             testID={`like-button-1`}
           >
             <Text style={styles.buttonText}>Curtir</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>*/}
         </View>
       </SafeAreaView>
     </>
