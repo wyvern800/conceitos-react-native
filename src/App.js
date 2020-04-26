@@ -21,23 +21,22 @@ export default function App() {
     });
   }, []);
 
-  useEffect(() => {
-    api.get("repositories").then((response) => {
-      console.log(response.data);
-      setRepositories(response.data);
-    });
-  }, [repositories]);
-
   async function handleLikeRepository(id) {
-    api.post(`/repositories/${id}/like`).then(
+    api.post("repositories/" + id + "/like").then(
       (response) => {
-        console.log("like dado ao repo ", id);
+        console.log("like dado ao repo " + id);
 
-        repositories.reduce((repositoriesOld, newRepositories) => [
+        /*repositories.reduce((repositoriesOld, newRepositories) => [
           repositories[id],
           response.data,
-        ]);
+        ]);*/
+
+        api.get("repositories").then((response) => {
+          console.log(response.data);
+          setRepositories(response.data);
+        });
       }
+
       // Implement "Like Repository" functionality
     );
   }
@@ -65,7 +64,9 @@ export default function App() {
                   ))*/}
 
                   {repository.techs.map((tech) => (
-                    <Text style={styles.tech}>{tech}</Text>
+                    <Text key={tech.id} style={styles.tech}>
+                      {tech}
+                    </Text>
                   ))}
                 </View>
 
